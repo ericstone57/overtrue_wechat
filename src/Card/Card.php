@@ -83,4 +83,16 @@ class Card extends AbstractAPI
 
     return $this->parseJSON('json', [self::API_CREATE, $params]);
   }
+
+  /**
+   * code 解码
+   *
+   * @param string $encryptedCode
+   *
+   * @return string
+   */
+  public function getRealCode($encryptedCode)
+  {
+    return $this->parseJSON('json', [self::API_CODE_DECRYPT, ['encrypt_code' => $encryptedCode]]);
+  }
 }
