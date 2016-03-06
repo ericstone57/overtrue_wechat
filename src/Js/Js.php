@@ -51,6 +51,12 @@ class Js extends AbstractAPI
     const TICKET_CACHE_PREFIX = 'overtrue.wechat.jsapi_ticket.';
 
     /**
+     * Ticket type.
+     */
+    const TICKET_TYPE_JSAPI = 'jsapi';
+    const TICKET_TYPE_CARD = 'wx_card';
+
+    /**
      * Api of ticket.
      */
     const API_TICKET = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket';
@@ -95,17 +101,18 @@ class Js extends AbstractAPI
     /**
      * Get jsticket.
      *
+     * @param string $type
      * @return string
      */
-    public function ticket()
+    public function ticket($type = self::TICKET_TYPE_JSAPI)
     {
-        $key = self::TICKET_CACHE_PREFIX.$this->getAccessToken()->getAppId();
+        $key = self::TICKET_CACHE_PREFIX.$this->getAccessToken()->getAppId().$type;
 
         if ($ticket = $this->getCache()->fetch($key)) {
             return $ticket;
         }
 
-        $result = $this->parseJSON('get', [self::API_TICKET, ['type' => 'jsapi']]);
+        $result = $this->parseJSON('get', [self::API_TICKET, ['type' => $type]]);
 
         $this->getCache()->save($key, $result['ticket'], $result['expires_in'] - 500);
 
@@ -153,6 +160,41 @@ class Js extends AbstractAPI
     {
         return sha1("jsapi_ticket={$ticket}&noncestr={$nonce}&timestamp={$timestamp}&url={$url}");
     }
+
+
+    /**
+     * CardExt.
+     *
+     * @param string $card_id
+     * @param string $code
+     * @param string $openid
+     * @param int $timestamp
+     * @param string $nonce
+     * @param int $outer_id
+     *
+     * @return array
+     */
+    public function getCardExt($card_id, $code = "", $openid = "", $timestamp = null, $nonce = null, $outer_id = 0)
+    {
+        $nonce = $nonce ? $nonce : Str::quickRandom(10);
+        $timestamp = $timestamp ? $timestamp : time();
+        $ticket = $this->ticket(self::TICKET_TYPE_CARD);
+
+        $arr = array($ticket, $timestamp, $card_id, $code, $openid, $nonce);
+        sort($arr, SORT_STRING);
+        $sign = sha1(implode('', $arr));
+
+        $cardExt = [
+          'code' => $code,
+          'openid' => $openid,
+          'timestamp' => $timestamp,
+          'signature' => $sign,
+          'outer_id' => $outer_id
+        ];
+
+        return $cardExt;
+    }
+
 
     /**
      * Set current url.
