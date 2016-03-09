@@ -25,6 +25,7 @@ use Doctrine\Common\Cache\FilesystemCache;
 use EasyWeChat\Core\AbstractAPI;
 use EasyWeChat\Support\Str;
 use EasyWeChat\Support\Url as UrlHelper;
+use EasyWeChat\Core\AccessToken;
 
 /**
  * Class Js.
@@ -168,31 +169,69 @@ class Js extends AbstractAPI
      * @param string $card_id
      * @param string $code
      * @param string $openid
-     * @param int $timestamp
-     * @param string $nonce
      * @param int $outer_id
      *
      * @return array
      */
-    public function getCardExt($card_id, $code = "", $openid = "", $timestamp = null, $nonce = null, $outer_id = 0)
+    public function getCardExt($card_id, $code = "", $openid = "", $outer_id = 0)
     {
-        $nonce = $nonce ? $nonce : Str::quickRandom(10);
-        $timestamp = $timestamp ? $timestamp : time();
+        $timestamp = time();
+        $nonce = Str::quickRandom(10);
         $ticket = $this->ticket(self::TICKET_TYPE_CARD);
-
-        $arr = array($ticket, $timestamp, $card_id, $code, $openid, $nonce);
-        sort($arr, SORT_STRING);
-        $sign = sha1(implode('', $arr));
+        $sign = $this->getCardSignature($ticket, $timestamp, $card_id, $code, $openid, $nonce);
 
         $cardExt = [
           'code' => $code,
           'openid' => $openid,
+          'outer_id' => $outer_id,
+          'nonce_str' => $nonce,
           'timestamp' => $timestamp,
           'signature' => $sign,
-          'outer_id' => $outer_id
         ];
 
         return $cardExt;
+    }
+
+    public function getChooseCardData($card_id = "", $card_type = "", $location_id = "")
+    {
+        $timestamp = time();
+        $nonce = Str::quickRandom(10);
+        $ticket = $this->ticket(self::TICKET_TYPE_CARD);
+        $app_id = $this->getAccessToken()->getAppId();
+
+        $sign = $this->getCardSignature(
+            $ticket,
+            $app_id,
+            $location_id,
+            $timestamp,
+            $nonce,
+            $card_id,
+            $card_type
+        );
+
+        return [
+            'shopId' => $location_id,
+            'cardType' => $card_type,
+            'cardId' => $card_id,
+            'timestamp' => $timestamp,
+            'nonceStr' => $nonce,
+            'signType' => 'SHA1',
+            'cardSign' => $sign
+        ];
+    }
+
+    /**
+     * 生成签名.
+     *
+     * @return string
+     */
+    public function getCardSignature()
+    {
+        $params = func_get_args();
+
+        sort($params, SORT_STRING);
+
+        return sha1(implode($params));
     }
 
 
