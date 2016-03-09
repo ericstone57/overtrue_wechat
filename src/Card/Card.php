@@ -3,6 +3,7 @@
 namespace EasyWeChat\Card;
 
 use EasyWeChat\Core\AbstractAPI;
+use EasyWeChat\Support\Arr;
 
 /**
 * Class Menu.
@@ -76,6 +77,7 @@ class Card extends AbstractAPI
     $card = array_merge(array('base_info' => $base), $properties);
     $params = array(
       'card' => array(
+
         'card_type' => $type,
         $key => $card,
       ),
@@ -95,4 +97,74 @@ class Card extends AbstractAPI
   {
     return $this->parseJSON('json', [self::API_CODE_DECRYPT, ['encrypt_code' => $encryptedCode]]);
   }
+
+  /**
+   * 设置测试白名单.
+   *
+   * <pre>
+   * $data:
+   * {
+   *     "openIds": {
+   *          "openid1",
+   *          "openid2",
+   *          "openid3"...
+   *     }
+   *     "usernames": {
+   *          "username1",
+   *          "username2",
+   *          "username3"...
+   *     }
+   * }
+   * </pre>
+   *
+   * @param array $data
+   *
+   * @return mixed
+   */
+  public function setWhitelist(array $data)
+  {
+    $data = array_merge(array('openIds' => array(), 'usernames' => array()), $data);
+    $params = array_merge(array('openid' => $data['openIds']), array('username' => $data['usernames']));
+
+    return $this->parseJSON('json', [self::API_TESTWHITELIST, $params]);
+  }
+
+  /**
+   * 通过openId设置测试白名单.
+   *
+   * $data:
+   * {
+   *     "openid1",
+   *     "openid2",
+   *     "openid3"...
+   * }
+   *
+   * @param array $data
+   *
+   * @return mixed
+   */
+  public function setWhitelistByOpenId(array $data)
+  {
+    return $this->setWhitelist(array('openIds' => $data));
+  }
+
+  /**
+   * 通过username设置测试白名单.
+   *
+   * $data:
+   * {
+   *     "username1",
+   *     "username2",
+   *     "username3"...
+   * }
+   *
+   * @param array $data
+   *
+   * @return mixed
+   */
+  public function setWhitelistByUsername(array $data)
+  {
+    return $this->setWhitelist(array('usernames' => $data));
+  }
+
 }
