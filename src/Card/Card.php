@@ -99,6 +99,31 @@ class Card extends AbstractAPI
   }
 
   /**
+   * 激活/绑定会员卡
+   *
+   * <pre>
+   * $data:
+   * {
+   *      "init_bonus": 100,
+   *      "init_balance": 200,
+   *      "membership_number": "AAA00000001", "code": "12312313",
+   *      "card_id": "xxxx_card_id"
+   * }
+   * </pre>
+   *
+   * @param string $cardId
+   * @param array  $data
+   *
+   * @return bool
+   */
+  public function memberCardActivate($cardId, array $data)
+  {
+    $params = array_merge(array('card_id' => $cardId), $data);
+
+    return $this->parseJSON('json', [self::API_MEMBER_CARD_ACTIVE, $params]);
+  }
+
+  /**
    * 设置测试白名单.
    *
    * <pre>
