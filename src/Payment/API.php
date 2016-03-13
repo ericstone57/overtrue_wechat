@@ -52,7 +52,7 @@ class API extends AbstractAPI
     const API_AUTH_CODE_TO_OPENID = 'https://api.mch.weixin.qq.com/tools/authcodetoopenid';
 
     // order id types.
-    const TRANSCATION_ID = 'transcation_id';
+    const TRANSACTION_ID = 'transaction_id';
     const OUT_TRADE_NO = 'out_trade_no';
     const OUT_REFUND_NO = 'out_refund_no';
     const REFUND_ID = 'refund_id';
@@ -82,6 +82,8 @@ class API extends AbstractAPI
      */
     public function pay(Order $order)
     {
+        $order->notify_url = $order->get('notify_url', $this->merchant->notify_url);
+
         return $this->request(self::API_PAY_ORDER, $order->all());
     }
 
@@ -94,6 +96,8 @@ class API extends AbstractAPI
      */
     public function prepare(Order $order)
     {
+        $order->notify_url = $order->get('notify_url', $this->merchant->notify_url);
+
         return $this->request(self::API_PREPARE_ORDER, $order->all());
     }
 
@@ -127,15 +131,15 @@ class API extends AbstractAPI
     }
 
     /**
-     * Query order by transcation_id.
+     * Query order by transaction_id.
      *
-     * @param string $transcationId
+     * @param string $transactionId
      *
      * @return \EasyWeChat\Support\Collection
      */
-    public function queryByTranscationId($transcationId)
+    public function queryByTransactionId($transactionId)
     {
-        return $this->query($transcationId, self::TRANSCATION_ID);
+        return $this->query($transactionId, self::TRANSACTION_ID);
     }
 
     /**
@@ -168,19 +172,19 @@ class API extends AbstractAPI
             $type => $orderNo,
         ];
 
-        return $this->request(self::API_REVERSE, $params);
+        return $this->safeRequest(self::API_REVERSE, $params);
     }
 
     /**
-     * Reverse order by transcation_id.
+     * Reverse order by transaction_id.
      *
-     * @param int $transcationId
+     * @param int $transactionId
      *
      * @return \EasyWeChat\Support\Collection
      */
-    public function reverseByTranscationId($transcationId)
+    public function reverseByTransactionId($transactionId)
     {
-        return $this->reverse($transcationId, self::TRANSCATION_ID);
+        return $this->reverse($transactionId, self::TRANSACTION_ID);
     }
 
     /**
@@ -196,6 +200,7 @@ class API extends AbstractAPI
      */
     public function refund(
         $orderNo,
+        $refundNo,
         $totalFee,
         $refundFee = null,
         $opUserId = null,
@@ -203,17 +208,18 @@ class API extends AbstractAPI
         ) {
         $params = [
             $type => $orderNo,
+            'out_refund_no' => $refundNo,
             'total_fee' => $totalFee,
             'refund_fee' => $refundFee ?: $totalFee,
             'refund_fee_type' => $this->merchant->fee_type,
             'op_user_id' => $opUserId ?: $this->merchant->merchant_id,
         ];
 
-        return $this->request(self::API_REFUND, $params);
+        return $this->safeRequest(self::API_REFUND, $params);
     }
 
     /**
-     * Refund by transcation id.
+     * Refund by transaction id.
      *
      * @param string $orderNo
      * @param float  $totalFee
@@ -222,13 +228,14 @@ class API extends AbstractAPI
      *
      * @return \EasyWeChat\Support\Collection
      */
-    public function refundByTranscationId(
+    public function refundByTransactionId(
         $orderNo,
+        $refundNo,
         $totalFee,
         $refundFee = null,
         $opUserId = null
         ) {
-        return $this->refund($orderNo, $totalFee, $refundFee, $opUserId, self::TRANSCATION_ID);
+        return $this->refund($orderNo, $refundNo, $totalFee, $refundFee, $opUserId, self::TRANSCATION_ID);
     }
 
     /**
@@ -263,13 +270,13 @@ class API extends AbstractAPI
     /**
      * Query refund status by transaction_id.
      *
-     * @param string $transcationId
+     * @param string $transactionId
      *
      * @return \EasyWeChat\Support\Collection
      */
-    public function queryRefundByTranscationId($transcationId)
+    public function queryRefundByTransactionId($transactionId)
     {
-        return $this->queryRefund($transcationId, self::TRANSCATION_ID);
+        return $this->queryRefund($transactionId, self::TRANSACTION_ID);
     }
 
     /**
@@ -380,19 +387,42 @@ class API extends AbstractAPI
      * @param string $api
      * @param array  $params
      * @param string $method
+     * @param array  $options
      *
      * @return \EasyWeChat\Support\Collection
      */
-    protected function request($api, array $params, $method = 'post')
+    protected function request($api, array $params, $method = 'post', array $options = [])
     {
         $params['appid'] = $this->merchant->app_id;
         $params['mch_id'] = $this->merchant->merchant_id;
         $params['device_info'] = $this->merchant->device_info;
-        $params['time_stamp'] = time();
         $params['nonce_str'] = uniqid();
         $params['sign'] = generate_sign($params, $this->merchant->key, 'md5');
 
-        return $this->parseResponse($this->getHttp()->{$method}($api, XML::build($params)));
+        $options = array_merge([
+            'body' => XML::build($params),
+        ], $options);
+
+        return $this->parseResponse($this->getHttp()->request($api, $method, $options));
+    }
+
+    /**
+     * Request with SSL.
+     *
+     * @param string $api
+     * @param array  $params
+     * @param string $method
+     *
+     * @return \EasyWeChat\Support\Collection
+     */
+    protected function safeRequest($api, array $params, $method = 'post')
+    {
+        $options = [
+            'cert' => $this->merchant->get('cert_path'),
+            'ssl_key' => $this->merchant->get('key_path'),
+        ];
+
+        return $this->request($api, $params, $method, $options);
     }
 
     /**
