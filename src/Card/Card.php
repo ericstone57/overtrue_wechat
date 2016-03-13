@@ -42,6 +42,7 @@ class Card extends AbstractAPI
   const API_UPDATE_STOCK = 'https://api.weixin.qq.com/card/modifystock';
   const API_MEMBER_CARD_ACTIVE = 'https://api.weixin.qq.com/card/membercard/activate';
   const API_MEMBER_CARD_TRADE = 'https://api.weixin.qq.com/card/membercard/updateuser';
+  const API_MEMBER_CARD_USER_INFO = 'https://api.weixin.qq.com/card/membercard/userinfo/get';
   const API_MOVIE_TICKET_UPDATE = 'https://api.weixin.qq.com/card/movieticket/updateuser';
   const API_BOARDING_PASS_CHECKIN = 'https://api.weixin.qq.com/card/boardingpass/checkin';
   const API_MEETING_TICKET_UPDATE = 'https://api.weixin.qq.com/card/meetingticket/updateuser';
@@ -114,13 +115,65 @@ class Card extends AbstractAPI
    * @param string $cardId
    * @param array  $data
    *
-   * @return bool
+   * @return \EasyWeChat\Support\Collection
    */
   public function memberCardActivate($cardId, array $data)
   {
     $params = array_merge(array('card_id' => $cardId), $data);
 
     return $this->parseJSON('json', [self::API_MEMBER_CARD_ACTIVE, $params]);
+  }
+
+  /**
+   * Get Member Card user info
+   *
+   * <pre>
+   * {
+   *    "card_id": "pbLatjtZ7v1BG_ZnTjbW85GYc_E8",
+   *    "code": "916679873278"
+   * }
+   * </pre>
+   *
+   * @param string $cardId
+   * @param string $code
+   *
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function memberCardUserInfo($cardId, $code)
+  {
+    $params = [
+      'card_id' => $cardId,
+      'code' => $code
+    ];
+    return $this->parseJSON('json', [self::API_MEMBER_CARD_USER_INFO, $params]);
+  }
+
+  /**
+   * 会员卡交易.
+   *
+   * <pre>
+   * $data:
+   * {
+   *     "code": "12312313",
+   *     "card_id":"p1Pj9jr90_SQRaVqYI239Ka1erkI",
+   *     "record_bonus": "消费30元，获得3积分",
+   *     "add_bonus": 3,
+   *     "add_balance": -3000
+   *     "record_balance": "购买焦糖玛琪朵一杯，扣除金额30元。"
+   *     "custom_field_value1": "xxxxx",
+   * }
+   * </pre>
+   *
+   * @param string $cardId
+   * @param array  $data
+   *
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function memberCardTrade($cardId, array $data)
+  {
+    $params = array_merge(array('card_id' => $cardId), $data);
+
+    return $this->parseJSON('json', [self::API_MEMBER_CARD_TRADE, $params]);
   }
 
   /**
