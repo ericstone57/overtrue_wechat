@@ -78,7 +78,6 @@ class Card extends AbstractAPI
     $card = array_merge(array('base_info' => $base), $properties);
     $params = array(
       'card' => array(
-
         'card_type' => $type,
         $key => $card,
       ),
@@ -174,6 +173,41 @@ class Card extends AbstractAPI
     $params = array_merge(array('card_id' => $cardId), $data);
 
     return $this->parseJSON('json', [self::API_MEMBER_CARD_TRADE, $params]);
+  }
+
+  /**
+   * 查询Code.
+   *
+   * @param string $code
+   * @param array $data
+   *
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function getCode($code, array $data)
+  {
+    $params = array_merge(array('code' => $code), $data);
+
+    return $this->parseJSON('json', [self::API_CODE_GET, $params]);
+  }
+
+
+  /**
+   * 核销
+   *
+   * @param string $code   要消耗序列号
+   * @param string $cardId 卡券 ID。创建卡券时 use_custom_code 填写 true 时必填。
+   *                       非自定义 code 不必填写。
+   *
+   * @return Bag
+   */
+  public function consume($code, $cardId = null)
+  {
+    $params = array(
+      'code' => $code,
+      'card_id' => $cardId,
+    );
+
+    return $this->parseJSON('json', [self::API_CONSUME, $params]);
   }
 
   /**
