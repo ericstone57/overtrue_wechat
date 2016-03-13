@@ -58,6 +58,7 @@ class Notice extends AbstractAPI
     const API_SEND_NOTICE = 'https://api.weixin.qq.com/cgi-bin/message/template/send';
     const API_SET_INDUSTRY = 'https://api.weixin.qq.com/cgi-bin/template/api_set_industry';
     const API_ADD_TEMPLATE = 'https://api.weixin.qq.com/cgi-bin/template/api_add_template';
+    const API_LIST_TEMPLATE = 'https://api.weixin.qq.com/cgi-bin/template/get_all_private_template';
 
     /**
      * Notice constructor.
@@ -137,6 +138,11 @@ class Notice extends AbstractAPI
         $this->message = $this->messageBackup;
 
         return $this->parseJSON('json', [self::API_SEND_NOTICE, $params]);
+    }
+
+    public function getTemplateList()
+    {
+        return $this->parseJSON('json', [self::API_LIST_TEMPLATE]);
     }
 
     /**
