@@ -41,6 +41,7 @@ class API extends AbstractAPI
     const API_PAY_ORDER = 'https://api.mch.weixin.qq.com/pay/micropay';
     const API_PREPARE_ORDER = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
     const API_QUERY = 'https://api.mch.weixin.qq.com/pay/orderquery';
+    const API_DELIVER_NOTIFY = 'https://api.mch.weixin.qq.com/pay/orderquery';
     const API_CLOSE = 'https://api.mch.weixin.qq.com/pay/closeorder';
     const API_REVERSE = 'https://api.mch.weixin.qq.com/secapi/pay/reverse';
     const API_REFUND = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
@@ -111,6 +112,18 @@ class API extends AbstractAPI
         ];
 
         return $this->request(self::API_QUERY, $params);
+    }
+
+    /**
+     * Deliver notify.
+     *
+     * @param array $params
+     *
+     * @return \EasyWeChat\Support\Collection
+     */
+    public function deliverNotify($params)
+    {
+        return $this->request(self::API_DELIVER_NOTIFY, $params);
     }
 
     /**
