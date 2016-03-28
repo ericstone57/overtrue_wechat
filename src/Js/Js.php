@@ -176,15 +176,16 @@ class Js extends AbstractAPI
     public function getCardExt($card_id, $code = "", $openid = "", $outer_id = 0)
     {
         $timestamp = time();
-        $nonce = Str::quickRandom(10);
+//        $nonce = Str::quickRandom(10);
+        $nonce = "";
         $ticket = $this->ticket(self::TICKET_TYPE_CARD);
         $sign = $this->getCardSignature($ticket, $timestamp, $card_id, $code, $openid, $nonce);
 
         $cardExt = [
           'code' => $code,
           'openid' => $openid,
-          'outer_id' => $outer_id,
-          'nonce_str' => $nonce,
+//          'outer_id' => $outer_id,
+//          'nonce_str' => $nonce,
           'timestamp' => $timestamp,
           'signature' => $sign,
         ];
