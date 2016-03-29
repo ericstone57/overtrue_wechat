@@ -87,6 +87,27 @@ class Card extends AbstractAPI
   }
 
   /**
+   * Update Card.
+   *
+   * @param string $cardId
+   * @param array $base
+   * @param array $properties
+   * @param string $type
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function update($cardId, array $base, array $properties = array(), $type = self::TYPE_GENERAL_COUPON)
+  {
+    $key = strtolower($type);
+    $card = array_merge(array('base_info' => $base), $properties);
+    $params = array(
+      'card_id' => $cardId,
+      $key => $card,
+    );
+
+    return $this->parseJSON('json', [self::API_UPDATE, $params]);
+  }
+
+  /**
    * code 解码
    *
    * @param string $encryptedCode
