@@ -297,7 +297,7 @@ class API extends AbstractAPI
      * @param string $date
      * @param string $type
      *
-     * @return \EasyWeChat\Support\Collection
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function downloadBill($date, $type = self::BILL_TYPE_ALL)
     {
@@ -306,7 +306,7 @@ class API extends AbstractAPI
             'bill_type' => $type,
         ];
 
-        return $this->request(self::API_DOWNLOAD_BILL, $params);
+        return $this->request(self::API_DOWNLOAD_BILL, $params, 'post', [], true)->getBody();
     }
 
     /**
@@ -388,10 +388,11 @@ class API extends AbstractAPI
      * @param array  $params
      * @param string $method
      * @param array  $options
+     * @param bool   $options
      *
-     * @return \EasyWeChat\Support\Collection
+     * @return \EasyWeChat\Support\Collection|\Psr\Http\Message\ResponseInterface
      */
-    protected function request($api, array $params, $method = 'post', array $options = [])
+    protected function request($api, array $params, $method = 'post', array $options = [], $returnResponse = false)
     {
         $params['appid'] = $this->merchant->app_id;
         $params['mch_id'] = $this->merchant->merchant_id;
@@ -403,7 +404,9 @@ class API extends AbstractAPI
             'body' => XML::build($params),
         ], $options);
 
-        return $this->parseResponse($this->getHttp()->request($api, $method, $options));
+        $response = $this->getHttp()->request($api, $method, $options);
+
+        return $returnResponse ? $response : $this->parseResponse($response);
     }
 
     /**
@@ -428,7 +431,7 @@ class API extends AbstractAPI
     /**
      * Parse Response XML to array.
      *
-     * @param string $response
+     * @param string|\Psr\Http\Message\ResponseInterface $response
      *
      * @return \EasyWeChat\Support\Collection
      */
