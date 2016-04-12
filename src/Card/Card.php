@@ -63,6 +63,35 @@ class Card extends AbstractAPI
     return $this->parseJSON('json', [self::API_GET, ['card_id' => $cardId]]);
   }
 
+
+  /**
+   * Batch get card list.
+   *
+   * <pre>
+   * status_list:
+   *  CARD_STATUS_NOT_VERIFY
+   *  CARD_STATUS_VERIFY_FAIL
+   *  CARD_STATUS_VERIFY_OK
+   *  CARD_STATUS_USER_DELETE
+   *  CARD_STATUS_DISPATCH
+   * </pre>
+   *
+   * @param int $offset
+   * @param int $count
+   * @param array $status_list
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function batchGet($offset = 0, $count = 50, array $status_list = array())
+  {
+    $params = [
+      'offset' => $offset,
+      'count' => $count,
+      'status_list' => $status_list
+    ];
+
+    return $this->parseJSON('json', [self::API_LIST, $params]);
+  }
+
   /**
    * 创建卡券.
    *
@@ -105,6 +134,33 @@ class Card extends AbstractAPI
     );
 
     return $this->parseJSON('json', [self::API_UPDATE, $params]);
+  }
+
+
+  /**
+   * Delete Card.
+   *
+   * @param $cardId
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function delete($cardId)
+  {
+    return $this->parseJSON('json', [self::API_DELETE, ['card_id' => $cardId]]);
+  }
+
+
+  /**
+   * Get user card list.
+   *
+   * @param $openId
+   * @param string $cardId
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function getCardList($openId, $cardId = '') {
+    $params['openid'] = $openId;
+    if (!empty($cardId)) $params['card_id'] = $cardId;
+
+    return $this->parseJSON('json', [self::API_USER_CARD_LIST, $params]);
   }
 
   /**
