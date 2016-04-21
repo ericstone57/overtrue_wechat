@@ -50,6 +50,7 @@ class Card extends AbstractAPI
   const API_TESTWHITELIST = 'https://api.weixin.qq.com/card/testwhitelist/set';
   const API_USER_CARD_LIST = 'https://api.weixin.qq.com/card/user/getcardlist';
   const API_LANDINGPAGE_CREATE = 'https://api.weixin.qq.com/card/landingpage/create';
+  const API_SMS_URL_GET = 'https://api.weixin.qq.com/card/sms/geturl';
 
   /**
    * 卡券详情.
@@ -354,6 +355,25 @@ class Card extends AbstractAPI
   public function setWhitelistByUsername(array $data)
   {
     return $this->setWhitelist(array('usernames' => $data));
+  }
+
+  /**
+   * 短信投放会员卡
+   *
+   * @param $cardId
+   * @param $code
+   * @param int $outer_id
+   * @return \EasyWeChat\Support\Collection
+   */
+  public function getSMSUrl($cardId, $code = "", $outer_id = 0)
+  {
+    $params = array(
+      'card_id' => $cardId,
+      'code' => $code,
+      'outer_id', $outer_id
+    );
+
+    return $this->parseJSON('json', [self::API_SMS_URL_GET, $params]);
   }
 
 }
