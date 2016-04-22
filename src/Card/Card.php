@@ -368,10 +368,11 @@ class Card extends AbstractAPI
   public function getSMSUrl($cardId, $code = "", $outer_id = 0)
   {
     $params = array(
-      'card_id' => $cardId,
-      'code' => $code,
-      'outer_id', $outer_id
+      'card_id' => $cardId
     );
+
+    if (!empty($code)) $params['code'] = $code;
+    if (!empty($outer_id)) $params['outer_id'] = $outer_id;
 
     return $this->parseJSON('json', [self::API_SMS_URL_GET, $params]);
   }
