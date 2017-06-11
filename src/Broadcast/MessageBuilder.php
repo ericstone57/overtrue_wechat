@@ -212,7 +212,7 @@ class MessageBuilder
             $group = [
                 'filter' => [
                     'is_to_all' => false,
-                    'group_id' => $group,
+                    'tag_id' => $group,
                 ],
             ];
         }
