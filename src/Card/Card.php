@@ -288,6 +288,17 @@ class Card extends AbstractAPI
     return $this->parseJSON('json', [self::API_CONSUME, $params]);
   }
 
+
+  public function unavailable($code, $cardId = null)
+  {
+    $params = array(
+      'code' => $code,
+      'card_id' => $cardId,
+    );
+
+    return $this->parseJSON('json', [self::API_UNAVAILABLE, $params]);
+  }
+
   /**
    * 设置测试白名单.
    *
