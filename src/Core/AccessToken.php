@@ -113,6 +113,14 @@ class AccessToken
         return $cached;
     }
 
+    public function getTokenTTL()
+    {
+        $cacheKey = $this->prefix.$this->appId;
+        $redis = $this->getCache()->getRedis();
+
+        return $redis->ttl(sprintf('[%s][%s]', $cacheKey, 1));
+    }
+
     /**
      * Return the app id.
      *
