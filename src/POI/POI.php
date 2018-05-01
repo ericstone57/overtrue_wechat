@@ -33,6 +33,21 @@ class POI extends AbstractAPI
     const API_UPDATE = 'http://api.weixin.qq.com/cgi-bin/poi/updatepoi';
     const API_DELETE = 'http://api.weixin.qq.com/cgi-bin/poi/delpoi';
 
+    const API_WXA_GET_DISTRICT = 'https://api.weixin.qq.com/wxa/get_district';
+    const API_WXA_ADD_STORE = 'https://api.weixin.qq.com/wxa/add_store';
+
+    public function getDistrict()
+    {
+        return $this->parseJSON('json', [self::API_WXA_GET_DISTRICT]);
+
+    }
+
+
+    public function addStore(array $data)
+    {
+       return $this->parseJSON('json', [self::API_WXA_ADD_STORE, $data]);
+    }
+
     /**
      * Get POI by ID.
      *
